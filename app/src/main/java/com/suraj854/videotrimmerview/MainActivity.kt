@@ -2,6 +2,8 @@ package com.suraj854.videotrimmerview
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
@@ -20,6 +22,9 @@ import com.suraj854.videotrimmerview.utilis.VideoTrimmerUtil.VideoTrimmerUtil.MA
 import com.suraj854.videotrimmerview.utilis.VideoTrimmerUtil.VideoTrimmerUtil.MAX_SHOOT_DURATION
 import com.suraj854.videotrimmerview.utilis.VideoTrimmerUtil.VideoTrimmerUtil.VIDEO_FRAMES_WIDTH
 import com.suraj854.videotrimmerview.widget.RangeSeekBarView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private val endPosition = 0
@@ -36,38 +41,39 @@ class MainActivity : AppCompatActivity() {
                 player.setVideoURI(Uri.parse(data.dataString))
                 player.start()
                 initRangeSeekBarView()
-                /*
-                                val mediaMetadataRetriever = MediaMetadataRetriever()
-                                mediaMetadataRetriever.setDataSource(
-                                    this@MainActivity,
-                                    (Uri.parse(data.dataString))
-                                )// Retrieve media data use microsecond
-                                val interval = (endPosition - 0) / (totalThumbsCount - 1)
-                                for (i in 0 until totalThumbsCount) {
-                                    val frameTime = startPosition + interval * i
-                                    var bitmap: Bitmap? = mediaMetadataRetriever.getFrameAtTime(
-                                        (frameTime * 1000).toLong(),
-                                        MediaMetadataRetriever.OPTION_CLOSEST_SYNC
-                                    )
-                                        ?: continue
+                CoroutineScope(Dispatchers.Main).launch {
 
-                                    bitmap = bitmap?.let {
-                                        Bitmap.createScaledBitmap(
-                                            it,
-                                            VideoTrimmerUtil.THUMB_WIDTH,
-                                            VideoTrimmerUtil.THUMB_HEIGHT,
-                                            false
-                                        )
-                                    }
-                                    if (bitmap != null) {
-                                        frameAdapter.addBitmaps(bitmap)
-                                    } else {
+                    val mediaMetadataRetriever = MediaMetadataRetriever()
+                    mediaMetadataRetriever.setDataSource(
+                        this@MainActivity,
+                        (Uri.parse(data.dataString))
+                    )// Retrieve media data use microsecond
+                    val interval = (endPosition - 0) / (totalThumbsCount - 1)
+                    for (i in 0 until totalThumbsCount) {
+                        val frameTime = startPosition + interval * i
+                        var bitmap: Bitmap? = mediaMetadataRetriever.getFrameAtTime(
+                            (frameTime * 1000).toLong(),
+                            MediaMetadataRetriever.OPTION_CLOSEST_SYNC
+                        )
+                            ?: continue
 
-                                    }
+                        bitmap = bitmap?.let {
+                            Bitmap.createScaledBitmap(
+                                it,
+                                VideoTrimmerUtil.THUMB_WIDTH,
+                                VideoTrimmerUtil.THUMB_HEIGHT,
+                                false
+                            )
+                        }
+                        if (bitmap != null) {
+                            frameAdapter.addBitmaps(bitmap)
+                        }
 
 
-                                }
-                                mediaMetadataRetriever.release()*/
+                    }
+                    mediaMetadataRetriever.release()
+
+                }
 
 
             }
